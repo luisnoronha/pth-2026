@@ -1,0 +1,5 @@
+docs/
+scripts/.hackrex/
+build/
+__pycache__/
+.claude/
