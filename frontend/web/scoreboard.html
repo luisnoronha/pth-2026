@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Hack Rex Scoreboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+  <style>
+    /* Layout: a projected 16:9 board. Top: where to play + the clock. Then the numbers,
+       then the funnel (which leash layer stopped each attack) beside winners and approved attacks.
+       Single light theme on purpose: white, cool greys, one cobalt accent. */
+    :root {
+      --bg: #ffffff;
+      --surface: #f5f7fa;
+      --line: #e3e7ee;
+      --track: #edf0f5;
+      --ink: #121722;
+      --muted: #5f6878;
+      --accent: #2346d8;
+      --win: #0d8a4e;
+      --danger: #c62f2f;
+      --display: "Schibsted Grotesk", "Segoe UI", system-ui, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+      color-scheme: light;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html, body { margin: 0; background: var(--bg); color: var(--ink); }
+    body { font: 20px/1.4 var(--display); -webkit-font-smoothing: antialiased; }
+    main {
+      max-width: 1680px; margin: 0 auto; display: grid; gap: 28px;
+      padding-block: 36px 40px;
+      padding-left: max(48px, env(safe-area-inset-left, 0px));
+      padding-right: max(48px, env(safe-area-inset-right, 0px));
+    }
+    header { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; flex-wrap: wrap; }
+    .eyebrow { font: 500 0.8rem/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+    h1 { margin: 10px 0 0; font: 800 3.6rem/1 var(--display); letter-spacing: -0.04em; }
+    .url { margin-top: 10px; font: 500 1.4rem var(--mono); color: var(--accent); }
+    .url.closed { color: var(--danger); }
+    .clock { text-align: right; }
+    .timer { font: 700 6rem/0.9 var(--mono); letter-spacing: -0.04em; font-variant-numeric: tabular-nums; cursor: pointer; user-select: none; }
+    .timer.running { color: var(--accent); }
+    .timer.done { color: var(--muted); }
+
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .stat { padding: 22px 0 20px; display: grid; gap: 4px; }
+    .stat + .stat { padding-left: 28px; border-left: 1px solid var(--line); }
+    .stat b { font: 800 3.8rem/1 var(--display); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+    .stat span { color: var(--muted); font-size: 1rem; }
+
+    .grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 48px; align-items: start; }
+    h2 { margin: 0 0 18px; font: 700 1.5rem var(--display); letter-spacing: -0.01em; }
+    .funnel { display: grid; gap: 14px; }
+    .row { display: grid; grid-template-columns: 56px minmax(0, 300px) 1fr 64px; align-items: center; gap: 16px; }
+    .lvl { font: 500 0.85rem/1 var(--mono); color: var(--muted); background: var(--surface); border-radius: 6px; padding: 7px 0; text-align: center; }
+    .name { font-weight: 600; font-size: 1.05rem; }
+    .track { height: 34px; background: var(--track); border-radius: 8px; overflow: hidden; }
+    .fill { height: 100%; width: 0; background: var(--accent); border-radius: 8px; transition: width 0.7s cubic-bezier(.2,.7,.2,1); }
+    .n { text-align: right; font: 700 1.6rem var(--display); font-variant-numeric: tabular-nums; }
+    .row.win .fill { background: var(--win); }
+    .row.win .name, .row.win .n { color: var(--win); }
+    .row.win .lvl { background: var(--win); color: #fff; }
+    .row.zero .n { color: var(--muted); font-weight: 500; }
+
+    aside { display: grid; gap: 36px; }
+    ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+    li { padding: 14px 0; border-top: 1px solid var(--line); display: grid; gap: 4px; }
+    li:last-child { border-bottom: 1px solid var(--line); }
+    .who { font-weight: 700; font-size: 1.15rem; }
+    .what { color: var(--muted); font-size: 0.9rem; }
+    .snippet { font: 0.88rem/1.45 var(--mono); color: var(--ink); background: var(--surface); padding: 8px 10px; border-radius: 8px; overflow-wrap: anywhere; }
+    .winner .who { color: var(--win); }
+    .empty { color: var(--muted); font-size: 1rem; }
+    @media (prefers-reduced-motion: reduce) { .fill { transition: none; } }
+    @media (max-width: 1000px) {
+      body { font-size: 16px; }
+      main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+      .grid { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: 1fr 1fr; }
+      .stat:nth-child(3) { padding-left: 0; border-left: 0; }
+      .row { grid-template-columns: 44px minmax(0, 1fr) 48px; }
+      .row .track { grid-column: 1 / -1; grid-row: 2; height: 18px; }
+      .timer { font-size: 3.6rem; }
+      h1 { font-size: 2.6rem; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <div class="eyebrow">Live · Rex at leash level 5</div>
+      <h1>Hack Rex</h1>
+      <div class="url" id="url"></div>
+    </div>
+    <div class="clock">
+      <div class="eyebrow">Round</div>
+      <div class="timer" id="timer" title="Click or press Space to start or reset the 3:00 round">3:00</div>
+    </div>
+  </header>
+
+  <section class="stats" aria-label="Totals">
+    <div class="stat"><b id="attempts">0</b><span id="running">attempts</span></div>
+    <div class="stat"><b id="players">0</b><span>people playing</span></div>
+    <div class="stat"><b id="front">0</b><span>front door: talk to Rex</span></div>
+    <div class="stat"><b id="back">0</b><span>back door: poisoned page</span></div>
+  </section>
+
+  <section class="grid">
+    <div>
+      <h2>Which layer stopped each attack</h2>
+      <div class="funnel" id="funnel"></div>
+    </div>
+    <aside>
+      <div>
+        <h2>Got through</h2>
+        <ul id="winners"></ul>
+      </div>
+      <div>
+        <h2>Wall of fame</h2>
+        <ul id="fame"></ul>
+      </div>
+    </aside>
+  </section>
+</main>
+<script src="config.js"></script>
+<script>
+  const API = window.HACKREX_API || "";
+  const $ = (id) => document.getElementById(id);
+  // Which leash level each funnel layer belongs to (S21 / S27 of the talk).
+  const LEVEL = { got_through: "!", fence: "L4", limits: "L5", sanitizer: "L3", guardrail: "L1–2", model: "Rex" };
+  const host = location.host;
+
+  function el(tag, cls, text) { return Object.assign(document.createElement(tag), { className: cls || "", textContent: text ?? "" }); }
+  function fill(id, items, emptyText) {
+    $(id).replaceChildren(...(items.length ? items : [el("li", "empty", emptyText)]));
+  }
+
+  function render(board) {
+    $("attempts").textContent = board.attempts;
+    $("running").textContent = board.running ? `attempts · ${board.running} in progress` : "attempts";
+    $("players").textContent = board.players;
+    $("front").textContent = board.by_mode.talk || 0;
+    $("back").textContent = board.by_mode.poison || 0;
+    $("url").className = "url" + (board.open ? "" : " closed");
+    $("url").textContent = board.open ? host : `${host} · closed`;
+
+    const max = Math.max(1, ...board.funnel.map((f) => f.count));
+    $("funnel").replaceChildren(...board.funnel.map((f) => {
+      const row = el("div", "row" + (f.layer === "got_through" ? " win" : "") + (f.count ? "" : " zero"));
+      const track = el("div", "track");
+      const bar = el("div", "fill");
+      bar.style.width = (100 * f.count / max) + "%";
+      track.append(bar);
+      row.append(el("span", "lvl", LEVEL[f.layer] || ""), el("span", "name", f.label), track, el("span", "n", f.count));
+      return row;
+    }));
+
+    fill("winners", board.winners.map((w) => {
+      const li = el("li", "winner");
+      li.append(el("span", "who", w.nickname), el("span", "what",
+        (w.won === "wallet" ? "burned the wallet" : "stole the secret") + " · " + (w.mode === "talk" ? "front door" : "back door")));
+      return li;
+    }), "Nobody yet.");
+    fill("fame", board.wall_of_fame.slice(-5).reverse().map((f) => {
+      const li = el("li");
+      li.append(el("span", "who", f.nickname), el("span", "what", (f.mode === "talk" ? "front door" : "back door") + " · " + f.stopped_by),
+        el("span", "snippet", f.snippet));
+      return li;
+    }), "The speaker approves attacks to show here.");
+  }
+
+  async function poll() {
+    try { render(await (await fetch(`${API}/api/scoreboard`, { cache: "no-store" })).json()); } catch { /* keep the last board */ }
+  }
+  poll();
+  setInterval(poll, 2000);
+
+  // 3:00 countdown: click or Space starts it; again resets.
+  let endsAt = null, tick = null;
+  function draw() {
+    const left = endsAt ? Math.max(0, Math.round((endsAt - Date.now()) / 1000)) : 180;
+    $("timer").textContent = Math.floor(left / 60) + ":" + String(left % 60).padStart(2, "0");
+    $("timer").className = "timer" + (endsAt ? (left === 0 ? " done" : " running") : "");
+    if (endsAt && left === 0) { clearInterval(tick); tick = null; }
+  }
+  function toggle() {
+    if (tick) { clearInterval(tick); tick = null; endsAt = null; }
+    else { endsAt = Date.now() + 180000; tick = setInterval(draw, 250); }
+    draw();
+  }
+  $("timer").addEventListener("click", toggle);
+  document.addEventListener("keydown", (e) => { if (e.code === "Space") { e.preventDefault(); toggle(); } });
+</script>
+</body>
+</html>

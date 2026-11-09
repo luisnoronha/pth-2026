@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Hack Rex Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+  <style>
+    /* Layout: a speaker's control panel, usable from a phone backstage.
+       Top: token, game open/closed. Below: every attempt, newest first, with an approve switch. */
+    :root {
+      --bg: #ffffff;
+      --surface: #f5f7fa;
+      --line: #e3e7ee;
+      --ink: #121722;
+      --muted: #5f6878;
+      --accent: #2346d8;
+      --accent-soft: #edf1fe;
+      --win: #0d8a4e;
+      --win-soft: #ebf8f1;
+      --danger: #c62f2f;
+      --danger-soft: #fdeeee;
+      --display: "Schibsted Grotesk", "Segoe UI", system-ui, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+      color-scheme: light;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html, body { margin: 0; background: var(--bg); color: var(--ink); }
+    body { font: 15px/1.45 var(--display); -webkit-font-smoothing: antialiased; }
+    main {
+      max-width: 860px; margin: 0 auto; display: grid; gap: 22px;
+      padding-block: 24px 48px;
+      padding-left: max(16px, env(safe-area-inset-left, 0px));
+      padding-right: max(16px, env(safe-area-inset-right, 0px));
+    }
+    h1 { margin: 0; font: 800 1.7rem/1.1 var(--display); letter-spacing: -0.02em; }
+    .sub { color: var(--muted); margin: 4px 0 0; }
+    .bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    input { flex: 1 1 220px; min-width: 0; font: 0.9rem var(--mono); padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); background: var(--bg); }
+    input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    button { font: 600 0.9rem var(--display); padding: 11px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
+    button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+    .switch { display: inline-flex; align-items: center; gap: 10px; }
+    .switch .state { font: 500 0.75rem/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; padding: 7px 10px; border-radius: 999px; }
+    .switch.open .state { background: var(--win-soft); color: var(--win); }
+    .switch.shut .state { background: var(--danger-soft); color: var(--danger); }
+    .danger { color: var(--danger); }
+    .confirm { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 12px; background: var(--danger-soft); border-radius: 10px; color: var(--danger); font-weight: 500; }
+    .msg { color: var(--danger); font-weight: 500; }
+    .counts { font: 0.8rem var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+    .list { display: grid; gap: 10px; }
+    .attempt { border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: grid; gap: 10px; }
+    .attempt.won { border-color: var(--win); background: var(--win-soft); }
+    .head { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; }
+    .head b { font-size: 1rem; }
+    .chip { font: 500 0.72rem/1 var(--mono); padding: 5px 8px; border-radius: 6px; background: var(--surface); color: var(--muted); }
+    .won .chip.out { background: var(--win); color: #fff; }
+    .time { margin-left: auto; font: 0.75rem var(--mono); color: var(--muted); }
+    pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; background: var(--surface); padding: 10px 12px; border-radius: 8px; font: 0.82rem/1.5 var(--mono); }
+    label { display: inline-flex; gap: 8px; align-items: center; font-weight: 600; cursor: pointer; }
+    label input { flex: none; width: 18px; height: 18px; accent-color: var(--accent); }
+    .empty { color: var(--muted); padding: 24px 0; }
+  </style>
+</head>
+<body>
+<main>
+  <div>
+    <h1>Hack Rex admin</h1>
+    <p class="sub">Approve which attacks appear on the big screen, and open or close the game.</p>
+  </div>
+
+  <div class="bar">
+    <input id="token" type="password" placeholder="Admin token" autocomplete="off" aria-label="Admin token">
+    <button class="primary" id="load">Load attempts</button>
+  </div>
+
+  <div class="bar">
+    <span class="switch" id="switch"><span class="state" id="state">…</span><button id="kill">…</button></span>
+    <button class="danger" id="reset">Delete all attempts</button>
+    <span class="counts" id="counts"></span>
+  </div>
+  <div class="confirm" id="confirm" hidden>
+    Delete every attempt? This cannot be undone.
+    <button class="danger" id="confirm-yes">Delete all</button>
+    <button id="confirm-no">Cancel</button>
+  </div>
+  <div class="msg" id="msg" role="alert"></div>
+
+  <div class="list" id="list"><p class="empty">Enter the token to see attempts.</p></div>
+</main>
+<script src="config.js"></script>
+<script>
+  const API = window.HACKREX_API || "";
+  const $ = (id) => document.getElementById(id);
+  try { $("token").value = sessionStorage.getItem("hackrex-admin") || ""; } catch {}
+  let isOpen = true;
+
+  async function api(path, body) {
+    const response = await fetch(API + path, {
+      method: body ? "POST" : "GET",
+      headers: { "Content-Type": "application/json", "X-Admin-Token": $("token").value },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(response.status === 401 ? "Wrong or missing admin token." : (data.error || response.status));
+    return data;
+  }
+
+  function el(tag, cls, text) { return Object.assign(document.createElement(tag), { className: cls || "", textContent: text ?? "" }); }
+
+  function render({ attempts, open }) {
+    isOpen = open;
+    $("switch").className = "switch " + (open ? "open" : "shut");
+    $("state").textContent = open ? "Open" : "Closed";
+    $("kill").textContent = open ? "Close game" : "Open game";
+    const done = attempts.filter((a) => a.verdict).length;
+    $("counts").textContent = `${attempts.length} attempts · ${attempts.length - done} running · ${attempts.filter((a) => a.approved).length} approved`;
+    if (!attempts.length) { $("list").replaceChildren(el("p", "empty", "No attempts yet.")); return; }
+    $("list").replaceChildren(...attempts.slice().reverse().map((a) => {
+      const won = a.verdict && a.verdict.won;
+      const box = el("div", "attempt" + (won ? " won" : ""));
+      const head = el("div", "head");
+      const outcome = !a.verdict ? "running…" : won ? "won: " + won : a.verdict.stopped_by_label;
+      head.append(el("b", "", a.nickname || "anonymous"), el("span", "chip", a.mode === "talk" ? "talk" : "page"),
+        el("span", "chip out", outcome), el("span", "time", new Date(a.ts * 1000).toLocaleTimeString()));
+      const label = document.createElement("label");
+      const check = Object.assign(document.createElement("input"), { type: "checkbox", checked: !!a.approved, id: "ok-" + a.id });
+      check.addEventListener("change", () => api("/api/admin/approve", { id: a.id, approved: check.checked }).catch(show));
+      label.append(check, "Show on the wall of fame");
+      box.append(head, el("pre", "", a.text), label);
+      return box;
+    }));
+  }
+  function show(error) { $("msg").textContent = error.message; }
+  async function load() {
+    $("msg").textContent = "";
+    try { sessionStorage.setItem("hackrex-admin", $("token").value); } catch {}
+    try { render(await api("/api/admin/attempts")); } catch (error) { show(error); }
+  }
+  $("load").addEventListener("click", load);
+  $("kill").addEventListener("click", () => api("/api/admin/killswitch", { open: !isOpen }).then(load).catch(show));
+  $("reset").addEventListener("click", () => { $("confirm").hidden = false; });
+  $("confirm-no").addEventListener("click", () => { $("confirm").hidden = true; });
+  $("confirm-yes").addEventListener("click", () => {
+    $("confirm").hidden = true;
+    api("/api/admin/reset", {}).then(load).catch(show);
+  });
+  if ($("token").value) load();
+  setInterval(() => { if ($("token").value && document.activeElement?.type !== "checkbox") load(); }, 5000);
+</script>
+</body>
+</html>

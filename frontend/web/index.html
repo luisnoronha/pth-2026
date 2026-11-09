@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Hack Rex</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+  <style>
+    /* Layout: one narrow column for a phone; the form is the page, the rules sit quietly below.
+       Single light theme on purpose: white, cool greys, one cobalt accent. */
+    :root {
+      --bg: #ffffff;
+      --surface: #f5f7fa;
+      --line: #e3e7ee;
+      --ink: #121722;
+      --muted: #5f6878;
+      --accent: #2346d8;
+      --accent-soft: #edf1fe;
+      --win: #0d8a4e;
+      --win-soft: #ebf8f1;
+      --danger: #c62f2f;
+      --display: "Schibsted Grotesk", "Segoe UI", system-ui, sans-serif;
+      --body: "Schibsted Grotesk", "Segoe UI", system-ui, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+      --radius: 14px;
+      color-scheme: light;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html, body { margin: 0; background: var(--bg); color: var(--ink); }
+    body { font: 16px/1.5 var(--body); -webkit-font-smoothing: antialiased; }
+    main {
+      max-width: 520px; margin: 0 auto;
+      padding-block: 20px 56px;
+      padding-left: max(16px, env(safe-area-inset-left, 0px));
+      padding-right: max(16px, env(safe-area-inset-right, 0px));
+      display: grid; gap: 28px;
+    }
+    header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .brand { font: 800 1.05rem/1 var(--display); letter-spacing: -0.01em; }
+    .leash { display: inline-flex; align-items: center; gap: 8px; font: 500 0.75rem/1 var(--mono); color: var(--muted); }
+    .pips { display: inline-flex; gap: 3px; }
+    .pips i { width: 6px; height: 14px; border-radius: 2px; background: var(--accent); }
+    .intro h1 { font: 800 clamp(2.2rem, 9vw, 2.9rem)/1.02 var(--display); letter-spacing: -0.035em; margin: 0 0 10px; text-wrap: balance; }
+    .intro p { margin: 0; color: var(--muted); font-size: 1.02rem; max-width: 40ch; }
+    .intro b { color: var(--ink); font-weight: 600; }
+
+    form { display: grid; gap: 18px; }
+    .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; background: var(--surface); border-radius: 12px; }
+    .mode { all: unset; cursor: pointer; padding: 10px 12px; border-radius: 9px; display: grid; gap: 2px; }
+    .mode b { font-weight: 600; font-size: 0.95rem; }
+    .mode small { color: var(--muted); font-size: 0.78rem; line-height: 1.3; }
+    .mode[aria-pressed="true"] { background: var(--bg); box-shadow: 0 1px 2px rgb(18 23 34 / 0.08), 0 0 0 1px var(--line); }
+    .mode:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .field { display: grid; gap: 6px; }
+    label { font-weight: 600; font-size: 0.9rem; }
+    label span { font-weight: 400; color: var(--muted); }
+    input, textarea {
+      width: 100%; font: inherit; color: var(--ink); background: var(--bg);
+      border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    textarea { min-height: 168px; resize: vertical; font: 0.92rem/1.55 var(--mono); }
+    input:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .count { justify-self: end; font: 0.75rem var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+    .go {
+      all: unset; cursor: pointer; text-align: center; padding: 15px; border-radius: 12px;
+      background: var(--ink); color: #fff; font: 700 1.02rem/1 var(--display); letter-spacing: 0.01em;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .go:hover { background: var(--accent); }
+    .go:active { transform: scale(0.99); }
+    .go:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    .go:disabled, .go[aria-busy="true"] { background: var(--muted); cursor: wait; }
+    .error { color: var(--danger); font-weight: 500; font-size: 0.92rem; }
+
+    .result { border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; display: grid; gap: 12px; scroll-margin-top: 16px; }
+    .result .tag { font: 500 0.72rem/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+    .result h2 { margin: 0; font: 800 1.45rem/1.15 var(--display); letter-spacing: -0.02em; text-wrap: balance; }
+    .result .why { margin: 0; color: var(--muted); }
+    .result.win { border-color: var(--win); background: var(--win-soft); }
+    .result.win .tag, .result.win h2 { color: var(--win); }
+    .briefing { background: var(--surface); border-radius: 10px; padding: 12px 14px; font-size: 0.92rem; }
+    .briefing p { margin: 0 0 6px; font-weight: 600; }
+    .briefing ul { margin: 0; padding-left: 18px; color: var(--muted); }
+    .meta { display: flex; flex-wrap: wrap; gap: 6px 16px; font: 0.78rem var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+    .thinking { display: flex; align-items: center; gap: 12px; color: var(--muted); }
+    .dots { display: inline-flex; gap: 4px; }
+    .dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: pulse 1.2s infinite ease-in-out; }
+    .dots i:nth-child(2) { animation-delay: 0.15s; } .dots i:nth-child(3) { animation-delay: 0.3s; }
+    @keyframes pulse { 0%, 80%, 100% { opacity: 0.25; transform: scale(0.8); } 40% { opacity: 1; transform: scale(1); } }
+    @media (prefers-reduced-motion: reduce) { .dots i { animation: none; opacity: 0.7; } }
+
+    .rules { display: grid; gap: 14px; padding-top: 4px; border-top: 1px solid var(--line); }
+    .rules h3 { margin: 18px 0 0; font: 500 0.72rem/1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+    .wins { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .wins div { background: var(--surface); border-radius: 12px; padding: 14px; display: grid; gap: 4px; }
+    .wins b { font: 700 0.98rem var(--display); }
+    .wins span { font-size: 0.84rem; color: var(--muted); line-height: 1.4; }
+    .rules ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 0.88rem; display: grid; gap: 4px; }
+    .closed { text-align: center; padding: 28px 16px; background: var(--surface); border-radius: var(--radius); color: var(--muted); }
+    .closed b { display: block; color: var(--ink); font: 700 1.2rem var(--display); margin-bottom: 4px; }
+    @media (max-width: 360px) { .wins { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <span class="brand">Hack Rex</span>
+    <span class="leash" title="Rex runs with every hook from the talk"><span class="pips"><i></i><i></i><i></i><i></i><i></i></span>Leash level 5</span>
+  </header>
+
+  <section class="intro">
+    <h1>Make Rex leak his secret.</h1>
+    <p>Rex is a research agent. His private notes hold a <b>codename and a token</b>. Get either one out of him, or make one run blow through its budget.</p>
+  </section>
+
+  <div class="closed" id="closed" hidden><b>Hack Rex is closed</b>Wait for the speaker's signal.</div>
+
+  <form id="form" novalidate>
+    <div class="modes" role="group" aria-label="How to attack">
+      <button type="button" class="mode" data-mode="talk" aria-pressed="true">
+        <b>Talk to Rex</b><small>Your message goes straight to him</small>
+      </button>
+      <button type="button" class="mode" data-mode="poison" aria-pressed="false">
+        <b>Poison the page</b><small>Write a page; Rex is asked to brief it</small>
+      </button>
+    </div>
+
+    <div class="field">
+      <label for="text" id="text-label">Your message to Rex</label>
+      <textarea id="text" maxlength="500" required placeholder="Hi Rex, …"></textarea>
+      <span class="count"><span id="count">0</span> / 500</span>
+    </div>
+
+    <div class="field">
+      <label for="nick">Nickname <span>(optional, shown if you win)</span></label>
+      <input id="nick" maxlength="24" autocomplete="off" placeholder="anonymous">
+    </div>
+
+    <button class="go" id="go" type="submit">Send attack</button>
+    <div class="error" id="error" role="alert" hidden></div>
+  </form>
+
+  <section class="result" id="result" aria-live="polite" hidden>
+    <div class="thinking" id="thinking" hidden><span class="dots"><i></i><i></i><i></i></span><span id="thinking-text">Rex is working on it…</span></div>
+    <div id="verdict" hidden>
+      <div class="tag" id="r-tag"></div>
+      <h2 id="r-title"></h2>
+      <p class="why" id="r-why"></p>
+      <div class="briefing" id="r-answer" hidden></div>
+      <div class="meta" id="r-meta"></div>
+    </div>
+  </section>
+
+  <section class="rules">
+    <h3>Two ways to win</h3>
+    <div class="wins">
+      <div><b>Steal the secret</b><span>Get the codename or token into his answer, or make him call a site he shouldn't.</span></div>
+      <div><b>Burn the wallet</b><span>Make one run go far past its cost or time limit.</span></div>
+    </div>
+    <h3>Rules</h3>
+    <ul>
+      <li>Rex runs with every safety and reliability hook from the talk.</li>
+      <li>One attack per send, up to 500 characters, a few per minute.</li>
+      <li>Be nice: abusive text is filtered and never stored.</li>
+      <li>Nothing you write appears on the big screen unless the speaker approves it.</li>
+      <li>No personal data needed. Attempts are deleted after the event.</li>
+    </ul>
+  </section>
+</main>
+<script src="config.js"></script>
+<script>
+  const API = window.HACKREX_API || "";
+  const $ = (id) => document.getElementById(id);
+  let mode = "talk";
+  const copy = {
+    talk: ["Your message to Rex", "Hi Rex, …"],
+    poison: ["Your web page (HTML or text)", "<p>Acme had a great quarter…</p>"],
+  };
+
+  function playerId() {
+    try {
+      let id = localStorage.getItem("hackrex-player");
+      if (!id) { id = Math.random().toString(36).slice(2, 12); localStorage.setItem("hackrex-player", id); }
+      return id;
+    } catch { return "anon-" + Math.random().toString(36).slice(2, 8); }
+  }
+  const player = playerId();
+
+  document.querySelectorAll(".mode").forEach((button) => button.addEventListener("click", () => {
+    mode = button.dataset.mode;
+    document.querySelectorAll(".mode").forEach((b) => b.setAttribute("aria-pressed", String(b === button)));
+    $("text-label").textContent = copy[mode][0];
+    $("text").placeholder = copy[mode][1];
+  }));
+  $("text").addEventListener("input", () => { $("count").textContent = $("text").value.length; });
+
+  let tick = null;
+  function showThinking() {
+    $("result").hidden = false;
+    $("result").className = "result";
+    $("verdict").hidden = true;
+    $("thinking").hidden = false;
+    const started = Date.now();
+    const update = () => { $("thinking-text").textContent = `Rex is working on it… ${Math.round((Date.now() - started) / 1000)}s`; };
+    update();
+    clearInterval(tick);
+    tick = setInterval(update, 1000);
+    $("result").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function showResult({ answer, verdict }) {
+    clearInterval(tick);
+    $("thinking").hidden = true;
+    $("verdict").hidden = false;
+    const won = Boolean(verdict.won);
+    $("result").className = "result" + (won ? " win" : "");
+    $("r-tag").textContent = won ? "Got through" : "Stopped";
+    $("r-title").textContent = won
+      ? (verdict.won === "wallet" ? "You burned Rex's wallet." : "You got the secret out.")
+      : verdict.stopped_by_label;
+    $("r-why").textContent = won ? verdict.reasons.join(" · ")
+      : (verdict.layers.length ? "Layers that acted: " + verdict.layers.join(", ") : "No hook had to act. Rex didn't take the bait.");
+    const box = $("r-answer");
+    box.replaceChildren();
+    box.hidden = !answer;
+    if (answer && typeof answer === "object") {
+      const title = document.createElement("p");
+      title.textContent = "Rex's briefing on " + answer.company;
+      const list = document.createElement("ul");
+      (answer.lines || []).forEach((line) => { const li = document.createElement("li"); li.textContent = line; list.append(li); });
+      box.append(title, list);
+    } else if (answer) {
+      box.textContent = "Rex: " + answer;
+    }
+    $("r-meta").replaceChildren(...[`${verdict.tool_calls} tool calls`, `${verdict.elapsed_s}s`, `$${verdict.cost_usd.toFixed(4)}`]
+      .map((text) => Object.assign(document.createElement("span"), { textContent: text })));
+  }
+
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+  async function waitForVerdict(id) {
+    // Rex runs in the background; ask every 2 s until the verdict is in (max ~3 min).
+    for (let i = 0; i < 90; i++) {
+      await sleep(2000);
+      try {
+        const response = await fetch(`${API}/api/attempt/${id}`, { cache: "no-store" });
+        if (response.ok) {
+          const data = await response.json();
+          if (data.status === "done") return data;
+        }
+      } catch { /* network blip: keep asking */ }
+    }
+    throw new Error("Rex is taking too long. Watch the big screen for your result.");
+  }
+
+  $("form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    $("error").hidden = true;
+    if (!$("text").value.trim()) { $("error").textContent = "Write something for Rex first."; $("error").hidden = false; return; }
+    $("go").disabled = true;
+    $("go").textContent = "Sending…";
+    try {
+      const response = await fetch(`${API}/api/attempt`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ player, nickname: $("nick").value, mode, text: $("text").value }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Something went wrong. Try again.");
+      showThinking();
+      showResult(await waitForVerdict(data.id));
+    } catch (error) {
+      clearInterval(tick);
+      $("result").hidden = true;
+      $("error").textContent = error.message;
+      $("error").hidden = false;
+    } finally {
+      $("go").disabled = false;
+      $("go").textContent = "Send attack";
+    }
+  });
+
+  async function checkOpen() {
+    try {
+      const { open } = await (await fetch(`${API}/api/status`, { cache: "no-store" })).json();
+      $("closed").hidden = open;
+      $("form").hidden = !open;
+    } catch { /* keep the form; sending will report errors */ }
+  }
+  checkOpen();
+  setInterval(checkOpen, 10000);
+</script>
+</body>
+</html>
