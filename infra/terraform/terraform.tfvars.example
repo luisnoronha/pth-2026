@@ -1,0 +1,10 @@
+# Copy to terraform.tfvars (git-ignored) to change any default from variables.tf.
+# region        = "eu-north-1"
+# rex_model     = "haiku-4-5"     # or haiku-5-5, gpt-mini (strands/rex.yaml)
+# rex_max_usd   = 0.06
+# rex_timeout_s = 60
+# max_attempts  = 1000
+# rex_reserved_concurrency = 20   # only if your account's Lambda concurrency quota allows it
+# For the talk only (costs money while on), then back to 0:
+# api_provisioned_concurrency = 2
+# rex_provisioned_concurrency = 5

@@ -1,0 +1,41 @@
+# Rex's model. To switch: change `active`, or run once with `--model <name>`
+# (CLI) or REX_MODEL=<name> (env). REX_MODEL_ID=<raw id> beats the entry's id.
+#
+# provider: anthropic -> ANTHROPIC_API_KEY in your environment (never in this file)
+#           openai    -> OPENAI_API_KEY in your environment (never in this file)
+# Prices are USD per 1M tokens (standard API, checked 2026-11-09), used by the cost budget.
+# `params` are passed to the provider as-is.
+
+active: haiku-4-5
+
+temperature: 0.0       # default; a model can override it (null = don't send it)
+max_tokens: 2048
+
+models:
+  # Anthropic API
+  haiku-4-5:
+    provider: anthropic
+    id: claude-haiku-4-5
+    price_in: 1.00
+    price_out: 5.00
+  haiku-5-5:
+    provider: anthropic
+    id: claude-haiku-5-5
+    temperature: null  # Haiku 5.5 rejects a custom temperature
+    params:
+      # Thinking is on by default on Haiku 5.5; forced tool use (how the Briefing
+      # is requested at the end) is not allowed with thinking on, so turn it off.
+      thinking: {type: disabled}
+    price_in: 0.10     # prompts up to 100K tokens ($0.50 / $2.50 beyond)
+    price_out: 0.50
+
+  # OpenAI API
+  gpt-mini:
+    provider: openai
+    id: gpt-5-mini     # exists; cheaper/newer options: gpt-5-nano, gpt-5.4-nano, gpt-6-luna
+    temperature: null  # reasoning models reject a custom temperature
+    params:
+      # Default reasoning made one attack take ~50 s (9-12 tool calls). Minimal keeps the game moving.
+      reasoning_effort: minimal
+    price_in: 0.25
+    price_out: 2.00

@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Webhook Board</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+  <style>
+    /* Layout: the right half of the stage screen during Demo 1. Quiet and white while
+       nothing arrives; the whole board turns red when Rex sends the secret out. */
+    :root {
+      --bg: #ffffff;
+      --surface: #f5f7fa;
+      --line: #e3e7ee;
+      --ink: #121722;
+      --muted: #5f6878;
+      --leak: #c62f2f;
+      --leak-bg: #fdeeee;
+      --display: "Schibsted Grotesk", "Segoe UI", system-ui, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+      color-scheme: light;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); }
+    body { font: 20px/1.4 var(--display); -webkit-font-smoothing: antialiased; transition: background 0.3s; }
+    main {
+      min-height: 100%; display: grid; grid-template-rows: auto 1fr auto; gap: 24px;
+      padding-block: 32px;
+      padding-left: max(32px, env(safe-area-inset-left, 0px));
+      padding-right: max(32px, env(safe-area-inset-right, 0px));
+    }
+    header { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .eyebrow { font: 500 0.8rem/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+    .host { font: 0.85rem var(--mono); color: var(--muted); overflow-wrap: anywhere; }
+    .center { display: grid; place-content: center; text-align: center; gap: 14px; }
+    .listening { display: grid; gap: 14px; justify-items: center; color: var(--muted); font-size: 1.6rem; }
+    .ring { width: 18px; height: 18px; border-radius: 50%; background: var(--muted); opacity: 0.5; animation: listen 2s infinite ease-in-out; }
+    @keyframes listen { 50% { opacity: 0.15; transform: scale(0.75); } }
+    .leak { display: none; gap: 18px; }
+    .leak h1 { margin: 0; color: var(--leak); font: 800 clamp(3rem, 8vw, 7rem)/0.95 var(--display); letter-spacing: -0.04em; }
+    .secret { font: 600 clamp(1.4rem, 3.4vw, 3rem)/1.2 var(--mono); color: var(--ink); background: var(--bg); border: 2px solid var(--leak); border-radius: 14px; padding: 14px 22px; overflow-wrap: anywhere; }
+    body.leaked { background: var(--leak-bg); }
+    body.leaked .listening { display: none; }
+    body.leaked .leak { display: grid; }
+    footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .meta { font: 0.85rem var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+    button { font: 600 0.85rem var(--display); padding: 9px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
+    button:focus-visible { outline: 2px solid var(--leak); outline-offset: 2px; }
+    @media (prefers-reduced-motion: reduce) { .ring { animation: none; } body { transition: none; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <span class="eyebrow">Attacker's webhook</span>
+    <span class="host" id="host"></span>
+  </header>
+  <div class="center">
+    <div class="listening"><span class="ring"></span>Listening. Nothing has leaked.</div>
+    <div class="leak">
+      <h1>Rex just leaked</h1>
+      <div class="secret" id="secret"></div>
+    </div>
+  </div>
+  <footer>
+    <span class="meta" id="meta"></span>
+    <button id="reset" title="Ignore hits so far, for the next demo run">Reset board</button>
+  </footer>
+</main>
+<script src="../config.js"></script>
+<script>
+  // Shows a leak only if it arrived after the board was (re)set, so each demo run starts quiet.
+  const WEBHOOK = window.WEBHOOK_URL || "";
+  const $ = (id) => document.getElementById(id);
+  let since = Date.now() / 1000;
+  try { since = Number(sessionStorage.getItem("board-since")) || since; } catch {}
+  function setSince(value) { since = value; try { sessionStorage.setItem("board-since", String(value)); } catch {} }
+  setSince(since);
+  try { $("host").textContent = WEBHOOK ? new URL(WEBHOOK).host : ""; } catch {}
+
+  async function poll() {
+    if (!WEBHOOK) { $("meta").textContent = "No webhook URL configured."; return; }
+    try {
+      const { hits } = await (await fetch(WEBHOOK.replace(/\/$/, "") + "/hits", { cache: "no-store" })).json();
+      const fresh = hits.filter((h) => h.ts >= since);
+      const leak = fresh.find((h) => h.leaked);
+      document.body.classList.toggle("leaked", Boolean(leak));
+      if (leak) $("secret").textContent = leak.secret;
+      $("meta").textContent = fresh.length ? `${fresh.length} hit${fresh.length > 1 ? "s" : ""} since reset` : "0 hits since reset";
+    } catch { $("meta").textContent = "Board offline, retrying…"; }
+  }
+  $("reset").addEventListener("click", () => { setSince(Date.now() / 1000); poll(); });
+  poll();
+  setInterval(poll, 1500);
+</script>
+</body>
+</html>

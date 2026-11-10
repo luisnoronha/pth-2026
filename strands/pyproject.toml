@@ -1,0 +1,35 @@
+[project]
+name = "leash"
+version = "0.1.0"
+description = "Rex, a demo research agent, and composable Strands hooks that keep it on a leash (Porto Tech Hub 2026)."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "strands-agents[anthropic,openai]==1.64.0",
+    "boto3==1.43.126",
+    "pyyaml==6.0.3",
+]
+
+[project.scripts]
+rex = "leash.rex.cli:main"
+hackrex-local = "leash.hackrex.server:main"
+
+[dependency-groups]
+dev = [
+    "moto[dynamodb,s3,secretsmanager,ssm]==5.2.5",
+    "pytest==9.2.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/leash"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "e2e: calls a real model API; skipped unless explicitly selected",
+]
+addopts = "-m 'not e2e'"
