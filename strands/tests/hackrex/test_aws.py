@@ -54,8 +54,8 @@ def test_dynamo_store_round_trip(store):
 def test_s3_page_host_writes_a_page_and_returns_its_url(aws):
     s3 = boto3.client("s3", region_name=REGION)
     s3.create_bucket(Bucket="site", CreateBucketConfiguration={"LocationConstraint": REGION})
-    url = S3PageHost("site", "https://d123.cloudfront.net/p/", client=s3).publish("abc", "<p>poison</p>")
-    assert url == "https://d123.cloudfront.net/p/abc.html"
+    url = S3PageHost("site", "https://abc123.execute-api.eu-north-1.amazonaws.com/live/p/", client=s3).publish("abc", "<p>poison</p>")
+    assert url == "https://abc123.execute-api.eu-north-1.amazonaws.com/live/p/abc.html"
     body = s3.get_object(Bucket="site", Key="p/abc.html")["Body"].read().decode()
     assert "<p>poison</p>" in body
 

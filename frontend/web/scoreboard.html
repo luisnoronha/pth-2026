@@ -106,7 +106,7 @@
     <div class="stat"><b id="attempts">0</b><span id="running">attempts</span></div>
     <div class="stat"><b id="players">0</b><span>people playing</span></div>
     <div class="stat"><b id="front">0</b><span>front door: talk to Rex</span></div>
-    <div class="stat"><b id="back">0</b><span>back door: poisoned page</span></div>
+    <div class="stat"><b id="back">0</b><span>back door: hidden in a page</span></div>
   </section>
 
   <section class="grid">
@@ -131,7 +131,7 @@
   const API = window.HACKREX_API || "";
   const $ = (id) => document.getElementById(id);
   // Which leash level each funnel layer belongs to (S21 / S27 of the talk).
-  const LEVEL = { got_through: "!", fence: "L4", limits: "L5", sanitizer: "L3", guardrail: "L1–2", model: "Rex" };
+  const LEVEL = { got_through: "!", fence: "L4", output: "L4", limits: "L5", sanitizer: "L3", guardrail: "L1–2", model: "Rex" };
   const host = location.host;
 
   function el(tag, cls, text) { return Object.assign(document.createElement(tag), { className: cls || "", textContent: text ?? "" }); }

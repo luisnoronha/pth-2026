@@ -47,7 +47,7 @@ def make_handler(api: Api, pages_folder: Path, web: Path = WEB):
         def _api(self, method: str) -> None:
             length = min(int(self.headers.get("Content-Length") or 0), 64_000)
             code, payload = api.handle(method, self.path.split("?")[0], dict(self.headers), self.rfile.read(length))
-            body = b"" if payload is None else json.dumps(payload, ensure_ascii=False).encode("utf-8")
+            body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
             self._send(code, body, "application/json")
 
         def do_GET(self):

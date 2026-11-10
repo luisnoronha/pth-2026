@@ -30,6 +30,7 @@ class DynamoAttemptStore:
     def add(self, attempt: dict[str, Any]) -> None:
         self.db.put_item(TableName=self.table, Item={
             "id": {"S": attempt["id"]},
+            "player": {"S": attempt["player"]},
             "doc": {"S": json.dumps(attempt, ensure_ascii=False)},
             "expires_at": {"N": str(int(time.time()) + KEEP_DAYS * 86400)},
         })
@@ -58,6 +59,10 @@ class DynamoAttemptStore:
     def count(self) -> int:
         return sum(page["Count"] for page in self._scan(Select="COUNT"))
 
+    def count_for(self, player: str) -> int:
+        return sum(page["Count"] for page in self._scan(
+            Select="COUNT", FilterExpression="player = :p", ExpressionAttributeValues={":p": {"S": player}}))
+
     def all(self) -> list[dict[str, Any]]:
         docs = [json.loads(item["doc"]["S"]) for page in self._scan() for item in page["Items"]]
         return sorted(docs, key=lambda a: a["ts"])
@@ -69,7 +74,7 @@ class DynamoAttemptStore:
 
 
 class S3PageHost:
-    """Poisoned pages go to s3://<bucket>/p/<id>.html, served by CloudFront at <base_url>/<id>.html."""
+    """Poisoned pages go to s3://<bucket>/p/<id>.html, served by the api Lambda at <base_url>/<id>.html."""
 
     def __init__(self, bucket: str, base_url: str, prefix: str = "p/", client=None):
         self.bucket, self.base_url, self.prefix = bucket, base_url.rstrip("/"), prefix

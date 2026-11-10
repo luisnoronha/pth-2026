@@ -3,8 +3,9 @@
 The local server (`server.py`) and the API Lambda (`backend/api/handler.py`)
 both call `handle()`, so the routes, checks and JSON are the same everywhere.
 
-  POST /api/attempt          {player, nickname, mode, text} -> 202 {id}   (Rex runs in the background)
+  POST /api/attempt          {player, nickname, mode, text} -> 202 {id, left}   (Rex runs in the background)
   GET  /api/attempt/<id>     -> {status: running|done, answer, verdict}
+  GET  /api/player/<id>      -> {left}: attacks this player can still send
   GET  /api/status           -> {open}
   GET  /api/scoreboard       -> the big-screen numbers (no unapproved text)
   GET  /api/admin/attempts   (X-Admin-Token) -> everything
@@ -28,6 +29,7 @@ from leash.hackrex.store import public_view, scoreboard
 
 MAX_BODY = 4096
 ATTEMPT_PATH = re.compile(r"^/api/attempt/([0-9a-f]{12})$")
+PLAYER_PATH = re.compile(r"^/api/player/([\w-]{1,64})$")
 
 
 class RateLimiter:
@@ -74,12 +76,12 @@ class Api:
         return data
 
     def _route(self, method: str, path: str, headers: dict[str, str], body: bytes) -> tuple[int, Any]:
-        if method == "OPTIONS":
-            return 204, None
         if method == "GET" and path == "/api/status":
             return 200, {"open": self.gate.switch.is_open()}
         if method == "GET" and path == "/api/scoreboard":
             return 200, {**scoreboard(self.gate.store.all()), "open": self.gate.switch.is_open()}
+        if method == "GET" and (match := PLAYER_PATH.match(path)):
+            return 200, {"left": self.gate.left_for(match.group(1))}
         if method == "GET" and (match := ATTEMPT_PATH.match(path)):
             attempt = self.gate.store.get(match.group(1))
             return (200, public_view(attempt)) if attempt else (404, {"error": "not found"})
@@ -91,7 +93,7 @@ class Api:
             attempt_id = self.gate.submit(player, str(data.get("nickname", "")), str(data.get("mode", "")),
                                           str(data.get("text", "")))
             self.start_run(attempt_id)
-            return 202, {"id": attempt_id}
+            return 202, {"id": attempt_id, "left": self.gate.left_for(player or "?")}
 
         if path.startswith("/api/admin/"):
             if not secrets.compare_digest(headers.get("x-admin-token", ""), self.admin_token):

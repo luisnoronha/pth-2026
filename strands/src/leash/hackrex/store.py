@@ -53,6 +53,10 @@ class AttemptStore:
         with self._lock:
             return len(self._attempts)
 
+    def count_for(self, player: str) -> int:
+        with self._lock:
+            return sum(1 for a in self._attempts.values() if a["player"] == player)
+
     def all(self) -> list[dict[str, Any]]:
         with self._lock:
             return sorted((dict(a) for a in self._attempts.values()), key=lambda a: a["ts"])
