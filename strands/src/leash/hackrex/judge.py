@@ -14,20 +14,10 @@ import os
 from typing import Any
 
 from leash.common.canary import canaries_in
+from leash.hackrex.layers import LABELS, LAYERS
 from leash.hooks.egress import NETWORK_TOOLS, allowlist_from_env, is_allowed
 from leash.hooks.levels import limit
 
-# Funnel order on the scoreboard: strongest fence first.
-LAYERS = ["fence", "output", "limits", "sanitizer", "guardrail", "model"]
-LABELS = {
-    "fence": "Blocked at the fence",
-    "output": "Output check",
-    "limits": "Budget / timeout / loop limits",
-    "sanitizer": "Sanitiser",
-    "guardrail": "Guardrail (flagged, shadow)",
-    "model": "Rex didn't fall for it",
-    "got_through": "Got through",
-}
 LIMIT_MARKERS = ("Time is up", "Budget reached", "DO NOT call", "could not produce", "refused before paying")
 FENCE_MARKERS = ("not on the allowlist", "did not appear in any page")
 

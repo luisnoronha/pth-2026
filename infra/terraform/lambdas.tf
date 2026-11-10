@@ -93,7 +93,7 @@ data "aws_iam_policy_document" "api" {
   }
   statement {
     actions   = ["lambda:InvokeFunction"]
-    resources = [aws_lambda_function.rex.arn]
+    resources = [aws_lambda_function.rex.arn, "${aws_lambda_function.rex.arn}:*"] # the function and its "live" alias
   }
   statement {
     actions   = ["bedrock:ApplyGuardrail"]
@@ -112,6 +112,7 @@ resource "aws_cloudwatch_log_group" "api" {
 }
 
 resource "aws_lambda_function" "api" {
+  publish          = true # versions for the "live" alias (warm.tf)
   function_name    = "${local.name}-api"
   role             = aws_iam_role.api.arn
   handler          = "api_handler.handler"
@@ -127,7 +128,7 @@ resource "aws_lambda_function" "api" {
     variables = merge(local.common_env, {
       SWITCH_PARAM                         = aws_ssm_parameter.switch.name
       ADMIN_TOKEN_PARAM                    = aws_ssm_parameter.admin_token.name
-      REX_FUNCTION                         = aws_lambda_function.rex.function_name
+      REX_FUNCTION                         = "${aws_lambda_function.rex.function_name}:${local.alias}" # warm.tf
       HACKREX_MODERATION_GUARDRAIL_ID      = aws_bedrock_guardrail.moderation.guardrail_id
       HACKREX_MODERATION_GUARDRAIL_VERSION = "DRAFT"
       HACKREX_MAX_ATTEMPTS                 = tostring(var.max_attempts)
@@ -176,6 +177,7 @@ resource "aws_cloudwatch_log_group" "rex" {
 }
 
 resource "aws_lambda_function" "rex" {
+  publish                        = true # versions for the "live" alias (warm.tf)
   function_name                  = "${local.name}-rex"
   role                           = aws_iam_role.rex.arn
   handler                        = "rex_handler.handler"
@@ -206,6 +208,7 @@ resource "aws_lambda_function" "rex" {
 
 resource "aws_lambda_function_event_invoke_config" "rex" {
   function_name                = aws_lambda_function.rex.function_name
+  qualifier                    = aws_lambda_alias.rex.name
   maximum_retry_attempts       = 0 # never run an attack twice
   maximum_event_age_in_seconds = 600
 }

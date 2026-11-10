@@ -16,7 +16,7 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
-from leash.hackrex.judge import LABELS, LAYERS
+from leash.hackrex.layers import LABELS, LAYERS
 
 SNIPPET_CHARS = 140
 

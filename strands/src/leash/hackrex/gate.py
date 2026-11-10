@@ -16,16 +16,16 @@ import time
 import uuid
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Protocol
-
-from strands.models.model import Model
+from typing import TYPE_CHECKING, Any, Protocol
 
 from leash.common.canary import contains_canary
 from leash.common.guardrail import bedrock_runtime_client
-from leash.hackrex.judge import judge
-from leash.hackrex.recorder import AttemptRecorderHook
-from leash.hooks.levels import MAX_LEVEL
-from leash.rex.agent import build_rex
+
+if TYPE_CHECKING:
+    from strands.models.model import Model
+
+# Rex, Strands and the model SDKs are imported inside Gate.run(), not here: the API
+# Lambda only submits and polls, and must start fast (cold starts were seconds).
 
 log = logging.getLogger("leash.hackrex")
 
@@ -133,7 +133,7 @@ def guardrail_moderator() -> Callable[[str], bool]:
 
 class Gate:
     def __init__(self, store, pages: PageHost, switch: Switch | None = None,
-                 make_model: Callable[[], Model | None] = lambda: None,
+                 make_model: "Callable[[], Model | None]" = lambda: None,
                  moderate: Callable[[str], bool] | None = None):
         self.store, self.pages, self.make_model = store, pages, make_model
         self.switch = switch or LocalSwitch()
@@ -170,6 +170,11 @@ class Gate:
 
     def run(self, attempt_id: str) -> dict[str, Any]:
         """Runs Rex on a submitted attempt, judges it and stores the verdict."""
+        from leash.hackrex.judge import judge
+        from leash.hackrex.recorder import AttemptRecorderHook
+        from leash.hooks.levels import MAX_LEVEL
+        from leash.rex.agent import build_rex
+
         attempt = self.store.get(attempt_id)
         if attempt is None:
             raise KeyError(attempt_id)

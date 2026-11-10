@@ -5,6 +5,7 @@
 #   guardrails.tf  Bedrock Guardrails: Rex (prompt attack, shadow) and moderation
 #   lambdas.tf     api (site + API), rex and webhook Lambdas + IAM
 #   api.tf         API Gateway (REST) + WAF: the one public https address
+#   warm.tf        cold starts: "live" aliases, keep-warm ping, optional provisioned concurrency
 #   outputs.tf     URLs and the commands you need
 
 resource "random_id" "suffix" {

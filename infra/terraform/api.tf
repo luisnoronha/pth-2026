@@ -28,7 +28,7 @@ resource "aws_api_gateway_integration" "proxy" {
   http_method             = aws_api_gateway_method.proxy.http_method
   type                    = "AWS_PROXY"
   integration_http_method = "POST"
-  uri                     = aws_lambda_function.api.invoke_arn
+  uri                     = aws_lambda_alias.api.invoke_arn
 }
 
 # "/" itself is not covered by {proxy+}: the attack page needs its own route.
@@ -45,7 +45,7 @@ resource "aws_api_gateway_integration" "root" {
   http_method             = aws_api_gateway_method.root.http_method
   type                    = "AWS_PROXY"
   integration_http_method = "POST"
-  uri                     = aws_lambda_function.api.invoke_arn
+  uri                     = aws_lambda_alias.api.invoke_arn
 }
 
 resource "aws_api_gateway_deployment" "hackrex" {
@@ -53,7 +53,8 @@ resource "aws_api_gateway_deployment" "hackrex" {
 
   triggers = {
     redeploy = sha1(jsonencode([aws_api_gateway_resource.proxy.id, aws_api_gateway_method.proxy.id,
-    aws_api_gateway_integration.proxy.id, aws_api_gateway_method.root.id, aws_api_gateway_integration.root.id]))
+      aws_api_gateway_integration.proxy.id, aws_api_gateway_method.root.id, aws_api_gateway_integration.root.id,
+    aws_api_gateway_integration.proxy.uri, aws_api_gateway_integration.root.uri]))
   }
 
   lifecycle {
@@ -82,6 +83,7 @@ resource "aws_lambda_permission" "api_gateway" {
   statement_id  = "api-gateway"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.api.function_name
+  qualifier     = aws_lambda_alias.api.name
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_api_gateway_rest_api.hackrex.execution_arn}/*/*"
 }

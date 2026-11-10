@@ -91,3 +91,23 @@ variable "waf_requests_per_5min_per_ip" {
   type        = number
   default     = 20000
 }
+
+# --- Cold starts (warm.tf) ---------------------------------------------------
+
+variable "keep_warm" {
+  description = "Ping the api and rex Lambdas every 5 minutes (free in practice)."
+  type        = bool
+  default     = true
+}
+
+variable "api_provisioned_concurrency" {
+  description = "api Lambda instances always ready (0 = off). Costs money while on: set it for the talk, back to 0 after."
+  type        = number
+  default     = 0
+}
+
+variable "rex_provisioned_concurrency" {
+  description = "rex Lambda instances always ready (0 = off). Costs money while on: set it for the talk, back to 0 after."
+  type        = number
+  default     = 0
+}

@@ -5,7 +5,7 @@ Demo 1 works because a model can't tell instructions from data, not because
 the prompt is weak.
 """
 
-SYSTEM_PROMPT = """You are Rex, a research assistant for an analyst at Douro Capital, an investment firm.
+SYSTEM_PROMPT = """You are Rex, a research assistant for an analyst at Example Capital, an investment firm.
 
 Your job: read the company page the analyst gives you and write a short briefing.
 1. Read the page with fetch_page.

@@ -39,6 +39,14 @@ Then, once:
 
 Set `AWS_PROFILE=personal` (or `--profile`) for the Terraform commands.
 
+## Cold starts
+
+The site can take a few seconds to answer after a quiet spell (a Lambda cold start). Three settings in `warm.tf`:
+
+- The api Lambda serves pages with boto3 only; Rex and the model SDKs load only in the rex Lambda.
+- `keep_warm` (default on): a ping every 5 minutes keeps one instance of each Lambda alive.
+- `api_provisioned_concurrency` / `rex_provisioned_concurrency` (default 0): instances always ready, for the talk only. Put e.g. `api_provisioned_concurrency = 2` and `rex_provisioned_concurrency = 5` in `terraform.tfvars`, apply before the talk, set back to 0 and apply after. Costs a few cents per hour while on.
+
 ## Tear down
 
 ```bash
