@@ -6,8 +6,7 @@ Terraform for Hack Rex and Demo 1 on AWS (`eu-north-1`), in `terraform/`. One ro
 
 | Piece | AWS |
 |---|---|
-| Attack page, scoreboard, admin, Demo 1 board and pages, poisoned pages (`/p/`) | S3 (private) + CloudFront |
-| API (submit, poll, scoreboard, admin) | API Gateway (REST) + WAF + `api` Lambda |
+| The whole site on one https address: attack page, scoreboard, admin, Demo 1 board and pages, poisoned pages (`/p/`), and the game API | API Gateway (REST) + WAF + `api` Lambda, pages kept in a private S3 bucket |
 | Rex at leash level 5, one run per attack | `rex` Lambda (async, no retries) |
 | Attempts / Demo 1 webhook hits | DynamoDB on-demand, auto-delete after 7 days |
 | Model API keys | Secrets Manager (created empty; you fill it) |
@@ -15,7 +14,7 @@ Terraform for Hack Rex and Demo 1 on AWS (`eu-north-1`), in `terraform/`. One ro
 | Rex guardrail (shadow) + moderation guardrail | Bedrock Guardrails |
 | Demo 1 attacker's webhook | `webhook` Lambda + Function URL |
 
-No AgentCore and no Bedrock models: Rex runs in Lambda and calls the Anthropic / OpenAI API.
+No AgentCore, no Bedrock models and no CloudFront: Rex runs in Lambda and calls the Anthropic / OpenAI API, and the api Lambda serves the pages. (Bedrock models and CloudFront both need AWS Support to verify a new account first.)
 
 ## Deploy
 
@@ -51,6 +50,6 @@ Everything goes, including the secret (no recovery window) and the buckets (forc
 ## Cost (rough, [verify])
 
 - Fixed: WAF ~$7/month (prorated hourly), Secrets Manager $0.40/month.
-- Per use: Lambda, API Gateway, DynamoDB, S3, CloudFront: cents for a few hundred attacks.
+- Per use: Lambda, API Gateway, DynamoDB, S3: cents for a few hundred attacks.
 - Guardrails: billed per 1,000 characters checked; Rex's guardrail reads every page it fetches. Roughly $0.004 per attack.
 - The model API (Anthropic / OpenAI) is billed on your API account: ~$0.01–0.03 per attack.

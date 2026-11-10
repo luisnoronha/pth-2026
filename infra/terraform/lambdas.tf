@@ -1,5 +1,5 @@
 # Three Lambdas from one zip (scripts/build_lambda.py):
-#   api      fast: validate, moderate, store, start Rex, answer with an id   (behind API Gateway)
+#   api      fast: serves the pages; validates, stores, starts Rex, answers with an id (behind API Gateway)
 #   rex      slow: run Rex at leash level 5, judge, store the verdict        (invoked async by api)
 #   webhook  Demo 1: the attacker's endpoint + the board's feed              (Function URL)
 # Each has its own role with only what it needs.
@@ -67,6 +67,10 @@ data "aws_iam_policy_document" "api" {
     resources = [aws_dynamodb_table.attempts.arn]
   }
   statement {
+    actions   = ["s3:GetObject"]
+    resources = ["${aws_s3_bucket.site.arn}/*"]
+  }
+  statement {
     actions   = ["s3:PutObject"]
     resources = ["${aws_s3_bucket.site.arn}/p/*"]
   }
@@ -124,11 +128,11 @@ resource "aws_lambda_function" "api" {
       SWITCH_PARAM                         = aws_ssm_parameter.switch.name
       ADMIN_TOKEN_PARAM                    = aws_ssm_parameter.admin_token.name
       REX_FUNCTION                         = aws_lambda_function.rex.function_name
-      ALLOWED_ORIGIN                       = local.site_url
       HACKREX_MODERATION_GUARDRAIL_ID      = aws_bedrock_guardrail.moderation.guardrail_id
       HACKREX_MODERATION_GUARDRAIL_VERSION = "DRAFT"
       HACKREX_MAX_ATTEMPTS                 = tostring(var.max_attempts)
       HACKREX_RATE_PER_MINUTE              = tostring(var.rate_per_minute)
+      HACKREX_ATTEMPTS_PER_PLAYER          = tostring(var.attempts_per_player)
     })
   }
 
@@ -181,7 +185,7 @@ resource "aws_lambda_function" "rex" {
   s3_key                         = local.lambda_common.s3_key
   source_code_hash               = local.lambda_common.code_hash
   timeout                        = 180 # Rex's own timeout is 60 s; the wallet win needs > 90 s
-  memory_size                    = 1024
+  memory_size                    = 512 # this account caps Lambda memory at 512 MB
   reserved_concurrent_executions = var.rex_reserved_concurrency
 
   environment {
@@ -190,7 +194,8 @@ resource "aws_lambda_function" "rex" {
       REX_MODEL             = var.rex_model
       REX_TIMEOUT_S         = tostring(var.rex_timeout_s)
       REX_MAX_USD           = tostring(var.rex_max_usd)
-      REX_EGRESS_ALLOWLIST  = "${aws_cloudfront_distribution.site.domain_name},example.com"
+      REX_EGRESS_ALLOWLIST  = local.site_host
+      REX_SOURCES_URL       = "${local.site_url}/demo/acme-q3.html"
       REX_GUARDRAIL_ID      = aws_bedrock_guardrail.rex.guardrail_id
       REX_GUARDRAIL_VERSION = "DRAFT"
     })

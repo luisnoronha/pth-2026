@@ -1,5 +1,5 @@
 variable "region" {
-  description = "One EU region for everything (CloudFront is global)."
+  description = "One EU region for everything."
   type        = string
   default     = "eu-north-1"
 }
@@ -60,6 +60,12 @@ variable "max_attempts" {
   description = "Total attempts accepted, then the game says it's full."
   type        = number
   default     = 1000
+}
+
+variable "attempts_per_player" {
+  description = "Total attacks each player (phone) can send."
+  type        = number
+  default     = 3
 }
 
 variable "rate_per_minute" {

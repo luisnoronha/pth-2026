@@ -26,17 +26,13 @@ output "demo_page_v2_url" {
   value = "${local.site_url}/demo/acme-ir-v2.html"
 }
 
-output "api_url" {
-  value = local.api_url
-}
-
 output "webhook_url" {
   value = aws_lambda_function_url.webhook.function_url
 }
 
-output "laptop_allowlist" {
-  description = "For Demo 1 on the laptop at levels 4-5: set REX_EGRESS_ALLOWLIST to this."
-  value       = "${aws_cloudfront_distribution.site.domain_name},example.com"
+output "laptop_env" {
+  description = "For Demo 1 on the laptop against these pages: run this in PowerShell first."
+  value       = "$env:REX_EGRESS_ALLOWLIST = \"${local.site_host}\"; $env:REX_SOURCES_URL = \"${local.site_url}/demo/acme-q3.html\""
 }
 
 output "admin_token_command" {

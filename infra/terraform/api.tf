@@ -1,5 +1,6 @@
-# REST API (not HTTP API: only REST supports WAF). One proxy route to the api Lambda.
-# Every request is quick (submit, poll, scoreboard), so the ~29 s API Gateway limit never bites.
+# REST API (not HTTP API: only REST supports WAF). Every path goes to the api Lambda, which
+# serves both the pages and the game API. Every request is quick (pages, submit, poll,
+# scoreboard), so the ~29 s API Gateway limit never bites.
 
 resource "aws_api_gateway_rest_api" "hackrex" {
   name = "${local.name}-api"
@@ -30,12 +31,29 @@ resource "aws_api_gateway_integration" "proxy" {
   uri                     = aws_lambda_function.api.invoke_arn
 }
 
+# "/" itself is not covered by {proxy+}: the attack page needs its own route.
+resource "aws_api_gateway_method" "root" {
+  rest_api_id   = aws_api_gateway_rest_api.hackrex.id
+  resource_id   = aws_api_gateway_rest_api.hackrex.root_resource_id
+  http_method   = "ANY"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_integration" "root" {
+  rest_api_id             = aws_api_gateway_rest_api.hackrex.id
+  resource_id             = aws_api_gateway_rest_api.hackrex.root_resource_id
+  http_method             = aws_api_gateway_method.root.http_method
+  type                    = "AWS_PROXY"
+  integration_http_method = "POST"
+  uri                     = aws_lambda_function.api.invoke_arn
+}
+
 resource "aws_api_gateway_deployment" "hackrex" {
   rest_api_id = aws_api_gateway_rest_api.hackrex.id
 
   triggers = {
     redeploy = sha1(jsonencode([aws_api_gateway_resource.proxy.id, aws_api_gateway_method.proxy.id,
-    aws_api_gateway_integration.proxy.id]))
+    aws_api_gateway_integration.proxy.id, aws_api_gateway_method.root.id, aws_api_gateway_integration.root.id]))
   }
 
   lifecycle {
