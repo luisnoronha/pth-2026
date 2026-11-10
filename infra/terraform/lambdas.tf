@@ -127,7 +127,7 @@ resource "aws_lambda_function" "api" {
   environment {
     variables = merge(local.common_env, {
       SWITCH_PARAM                         = aws_ssm_parameter.switch.name
-      ADMIN_TOKEN_PARAM                    = aws_ssm_parameter.admin_token.name
+      ADMIN_TOKEN_PARAM                    = "${aws_ssm_parameter.admin_token.name}:${aws_ssm_parameter.admin_token.version}"
       REX_FUNCTION                         = "${aws_lambda_function.rex.function_name}:${local.alias}" # warm.tf
       HACKREX_MODERATION_GUARDRAIL_ID      = aws_bedrock_guardrail.moderation.guardrail_id
       HACKREX_MODERATION_GUARDRAIL_VERSION = "DRAFT"

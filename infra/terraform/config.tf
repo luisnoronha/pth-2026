@@ -25,7 +25,8 @@ resource "aws_ssm_parameter" "switch" {
   }
 }
 
-# Admin token for /admin.html. Read it with the `admin_token_command` output.
+# Initial admin token for /admin.html. Rotate it in Parameter Store, then apply
+# Terraform to publish the API Lambda with the new parameter version.
 resource "random_password" "admin_token" {
   length  = 20
   special = false
@@ -35,4 +36,8 @@ resource "aws_ssm_parameter" "admin_token" {
   name  = "/${local.name}/admin-token"
   type  = "SecureString"
   value = random_password.admin_token.result
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
