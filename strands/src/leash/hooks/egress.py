@@ -17,7 +17,7 @@ from strands.hooks import BeforeToolCallEvent, HookProvider, HookRegistry
 log = logging.getLogger("leash.hooks")
 
 NETWORK_TOOLS = frozenset({"fetch_page", "check_link"})
-DEFAULT_ALLOWLIST = "localhost:8000,example.com"
+DEFAULT_ALLOWLIST = "localhost:8000"
 
 
 def allowlist_from_env() -> frozenset[str]:

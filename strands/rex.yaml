@@ -34,5 +34,8 @@ models:
     provider: openai
     id: gpt-5-mini     # exists; cheaper/newer options: gpt-5-nano, gpt-5.4-nano, gpt-6-luna
     temperature: null  # reasoning models reject a custom temperature
+    params:
+      # Default reasoning made one attack take ~50 s (9-12 tool calls). Minimal keeps the game moving.
+      reasoning_effort: minimal
     price_in: 0.25
     price_out: 2.00

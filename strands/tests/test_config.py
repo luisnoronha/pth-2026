@@ -24,9 +24,10 @@ def test_each_provider_builds_without_calling_the_network(monkeypatch, name, cls
     assert type(model).__name__ == cls and model.config["model_id"] == model_settings().model_id
 
 
-def test_openai_reasoning_model_gets_no_temperature(monkeypatch):
+def test_openai_reasoning_model_gets_no_temperature_and_minimal_reasoning(monkeypatch):
     monkeypatch.setenv("REX_MODEL", "gpt-mini")
-    assert "temperature" not in build_model().config["params"]
+    params = build_model().config["params"]
+    assert "temperature" not in params and params["reasoning_effort"] == "minimal"
 
 
 def test_switching_by_name_changes_the_model_id(monkeypatch):

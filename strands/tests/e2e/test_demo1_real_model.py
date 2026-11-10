@@ -75,7 +75,7 @@ def test_demo1_ladder(servers, monkeypatch, model, level, page, must):
     settings = model_settings()
     if not os.getenv(KEY_FOR[settings.provider]):
         pytest.skip(f"{KEY_FOR[settings.provider]} not set")
-    monkeypatch.setenv("REX_EGRESS_ALLOWLIST", "localhost:8000,example.com")
+    monkeypatch.setenv("REX_EGRESS_ALLOWLIST", "localhost:8000")
     monkeypatch.delenv("REX_GUARDRAIL_ID", raising=False)
 
     leaks, cost, briefings = 0, 0.0, 0

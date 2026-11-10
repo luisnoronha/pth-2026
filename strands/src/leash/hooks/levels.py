@@ -20,6 +20,7 @@ from strands.hooks import HookProvider
 from leash.hooks.budget import CostBudgetHook, PreSpendGuardHook
 from leash.hooks.egress import EgressAllowlistHook
 from leash.hooks.loop_breakers import StructuredOutputRetryHook, ToolCallLimitHook
+from leash.hooks.output_guard import OutputSecretGuardHook
 from leash.hooks.sanitizer import ContentSanitizationHook
 from leash.hooks.shadow_guardrail import ShadowGuardrailHook
 from leash.hooks.state_init import StateInitHook
@@ -47,6 +48,7 @@ HOOKS: list[tuple[int, Callable[[], HookProvider]]] = [
     (5, lambda: PreSpendGuardHook(max_input_tokens=int(limit("REX_MAX_INPUT_TOKENS")))),
     (4, EgressAllowlistHook),
     (4, UrlCircuitBreakerHook),
+    (4, OutputSecretGuardHook),
     (5, ToolCallLimitHook),
     (5, StructuredOutputRetryHook),
     (5, TracingHook),                                                            # 3. observe

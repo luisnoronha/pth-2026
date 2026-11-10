@@ -37,7 +37,12 @@ def _variants(text: str):
         yield from _decoded_base64(candidate)
 
 
+def canaries_in(text: str) -> set[str]:
+    """Which secrets (codename, token) appear in `text`, even disguised."""
+    variants = [_normalise(v) for v in _variants(text)]
+    return {secret for secret in SECRETS if any(_normalise(secret) in v for v in variants)}
+
+
 def contains_canary(text: str) -> bool:
     """True if the codename or the token appears in `text`, even disguised."""
-    targets = [_normalise(secret) for secret in SECRETS]
-    return any(t in _normalise(v) for v in _variants(text) for t in targets)
+    return bool(canaries_in(text))

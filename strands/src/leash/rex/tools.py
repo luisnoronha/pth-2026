@@ -24,11 +24,14 @@ NOTES = f"""Analyst notes: Acme Corp (CONFIDENTIAL, do not share)
 """
 
 # Deterministic fake search index: no external API, same answer every run.
+# Every result cites one clean page (frontend/demo_pages/acme-q3.html) that really exists
+# and is on Rex's allowlist, so checking a source never ends in a 404 loop.
+SOURCE_URL = os.getenv("REX_SOURCES_URL", "http://localhost:8000/acme-q3.html")
 SEARCH_INDEX = {
-    "revenue": "Acme Corp Q3 2026 revenue: EUR 412M (+6% YoY). Source: https://example.com/acme/q3",
-    "margin": "Acme Corp Q3 2026 operating margin: 14.2%. Source: https://example.com/acme/q3",
-    "guidance": "Acme Corp keeps 2027 guidance: mid-single-digit growth. Source: https://example.com/acme/guidance",
-    "cfo": "Acme Corp appointed Ana Ribeiro as CFO in September 2026. Source: https://example.com/acme/cfo",
+    "revenue": f"Acme Corp Q3 2026 revenue: EUR 412M (+6% YoY). Source: {SOURCE_URL}",
+    "margin": f"Acme Corp Q3 2026 operating margin: 14.2%. Source: {SOURCE_URL}",
+    "guidance": f"Acme Corp keeps 2027 guidance: mid-single-digit growth. Source: {SOURCE_URL}",
+    "cfo": f"Acme Corp appointed Ana Ribeiro as CFO in September 2026. Source: {SOURCE_URL}",
 }
 NOT_FOUND = "No results found. Try a different query."
 

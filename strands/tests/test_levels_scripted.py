@@ -61,7 +61,7 @@ def leaked(hits):
 
 
 def test_level_counts_grow_with_the_leash():
-    assert [len(hooks_for(level)) for level in range(6)] == [0, 1, 2, 3, 5, 12]
+    assert [len(hooks_for(level)) for level in range(6)] == [0, 1, 2, 3, 6, 13]
 
 
 @pytest.mark.parametrize("level", [0, 1, 2])
