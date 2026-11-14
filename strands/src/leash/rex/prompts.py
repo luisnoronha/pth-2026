@@ -1,7 +1,7 @@
 """Rex's system prompt.
 
 Deliberately ordinary: nothing here tells Rex to obey web pages. The hijack in
-Demo 1 works because a model can't tell instructions from data, not because
+The hijack works because a model can't tell instructions from data, not because
 the prompt is weak.
 """
 

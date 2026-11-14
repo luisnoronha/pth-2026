@@ -1,5 +1,5 @@
 variable "region" {
-  description = "One EU region for everything."
+  description = "One region for everything."
   type        = string
   default     = "eu-north-1"
 }
@@ -13,13 +13,13 @@ variable "project" {
 variable "owner" {
   description = "Tag: who to ask about these resources."
   type        = string
-  default     = "luis"
+  default     = "unset"
 }
 
 variable "delete_after" {
-  description = "Tag: when this can all be destroyed."
+  description = "Tag: when this can all be destroyed (e.g. the day after your session)."
   type        = string
-  default     = "2026-11-17"
+  default     = "unset"
 }
 
 variable "lambda_zip" {
@@ -87,7 +87,7 @@ variable "api_throttle_burst" {
 }
 
 variable "waf_requests_per_5min_per_ip" {
-  description = "Flood guard per IP. High on purpose: the whole audience may share one venue wifi IP, and phones poll."
+  description = "Flood guard per IP. High on purpose: a whole room can share one wifi IP, and phones poll."
   type        = number
   default     = 20000
 }
@@ -101,13 +101,13 @@ variable "keep_warm" {
 }
 
 variable "api_provisioned_concurrency" {
-  description = "api Lambda instances always ready (0 = off). Costs money while on: set it for the talk, back to 0 after."
+  description = "api Lambda instances always ready (0 = off). Costs money while on: set it for a live session, back to 0 after."
   type        = number
   default     = 0
 }
 
 variable "rex_provisioned_concurrency" {
-  description = "rex Lambda instances always ready (0 = off). Costs money while on: set it for the talk, back to 0 after."
+  description = "rex Lambda instances always ready (0 = off). Costs money while on: set it for a live session, back to 0 after."
   type        = number
   default     = 0
 }

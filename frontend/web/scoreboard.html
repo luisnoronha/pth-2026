@@ -130,7 +130,7 @@
 <script>
   const API = window.HACKREX_API || "";
   const $ = (id) => document.getElementById(id);
-  // Which leash level each funnel layer belongs to (S21 / S27 of the talk).
+  // Which leash level each funnel layer belongs to.
   const LEVEL = { got_through: "!", fence: "L4", output: "L4", limits: "L5", sanitizer: "L3", guardrail: "L1–2", model: "Rex" };
   const host = location.host;
 
@@ -170,7 +170,7 @@
       li.append(el("span", "who", f.nickname), el("span", "what", (f.mode === "talk" ? "front door" : "back door") + " · " + f.stopped_by),
         el("span", "snippet", f.snippet));
       return li;
-    }), "The speaker approves attacks to show here.");
+    }), "The host approves attacks to show here.");
   }
 
   async function poll() {

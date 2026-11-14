@@ -22,7 +22,7 @@ provider "aws" {
     tags = {
       project      = var.project
       owner        = var.owner
-      event        = "porto-tech-hub-2026"
+      project_repo = "keeping-ai-agents-on-a-leash"
       delete_after = var.delete_after
       managed_by   = "terraform"
     }

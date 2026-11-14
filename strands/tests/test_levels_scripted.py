@@ -2,7 +2,7 @@
 
 The scripted model always "falls for" the injection, so these tests show what
 each leash level does to the SAME hijack. Whether the real model falls for it
-is a rehearsal question (e2e, Bedrock), not a unit test.
+is an e2e question (tests/e2e), not a unit test.
 """
 
 import pytest

@@ -6,8 +6,8 @@ for the laptop) and `DynamoAttemptStore` (in `leash.hackrex.aws`, for AWS).
 An attempt is one record: status "running" while Rex works, then "done" with
 the answer and the judge's verdict.
 
-Privacy: raw attack text is stored for the speaker's review, but the public
-scoreboard only shows it once the speaker approves it.
+Privacy: raw attack text is stored for the host's review, but the public
+scoreboard only shows it once the host approves it.
 """
 
 import json

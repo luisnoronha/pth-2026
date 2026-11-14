@@ -3,7 +3,7 @@
 #      (needed for provisioned concurrency; harmless otherwise)
 #   2. keep_warm: a ping every 5 minutes, so one instance of each stays alive between visits
 #   3. *_provisioned_concurrency: N instances always ready. Costs money while on:
-#      turn it on before the talk, back to 0 after.
+#      turn it on before a live session, back to 0 after.
 
 locals {
   alias = "live"

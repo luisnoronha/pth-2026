@@ -5,6 +5,6 @@
 # rex_timeout_s = 60
 # max_attempts  = 1000
 # rex_reserved_concurrency = 20   # only if your account's Lambda concurrency quota allows it
-# For the talk only (costs money while on), then back to 0:
+# For a live session only (costs money while on), then back to 0:
 # api_provisioned_concurrency = 2
 # rex_provisioned_concurrency = 5

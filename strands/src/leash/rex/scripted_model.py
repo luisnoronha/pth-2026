@@ -2,7 +2,7 @@
 
 Two uses:
 - tests: run the real agent loop (tools, hooks, structured output) without a real model;
-- stage fallback: replay the hijack if the venue has no network.
+- offline demos: replay the hijack without a model API.
 
 A step is {"tool": name, "input": {...}} or {"text": "..."}, or a callable that
 gets the conversation and returns a step. When the script runs out, the last

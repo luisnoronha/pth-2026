@@ -1,4 +1,4 @@
-"""Local stand-in for Demo 1's S3 page + webhook board. Standard library only.
+"""The attack demo on your laptop: the Acme pages + the attacker's webhook. Standard library only.
 
     python scripts/local_demo.py
 
@@ -6,8 +6,8 @@
 - http://localhost:8001/c?d=...: the "webhook". Prints every hit; shouts if the secret arrived.
 
 Two ports on purpose: the egress allowlist (leash level 4) allows the page's
-host:port and not the webhook's, just like S3 vs a Lambda URL in the real setup.
-The real thing will be an S3 website + a Lambda Function URL (step 7).
+host:port and not the webhook's, just like the two hosts in the AWS setup
+(infra/: the site behind API Gateway, the webhook on a Lambda Function URL).
 """
 
 import argparse

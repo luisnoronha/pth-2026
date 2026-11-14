@@ -8,7 +8,7 @@ Because it only reacts to what it actually reads, the leash still matters:
 - page v2 (paraphrased) slips past the sanitiser, so it leaks again (level 3b);
 - level 4 lets it try, then the fence cancels the call.
 
-Uses: stage fallback without network to AWS, and local Hack Rex runs.
+Uses: trying the leash without an API key, offline demos, and local Hack Rex runs.
 """
 
 import re
