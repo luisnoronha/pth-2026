@@ -1,6 +1,6 @@
 """Token prices used by the budget hook: the active model's prices from rex.yaml.
 
-ILLUSTRATIVE until checked: [verify] against the provider's public price list.
+Check them against the provider's current price list before trusting a budget.
 """
 
 from leash.common.config import model_settings

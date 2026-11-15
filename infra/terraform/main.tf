@@ -1,6 +1,6 @@
-# Hack Rex + Demo 1 on AWS. One root, one file per concern:
+# Hack Rex and the attack demo on AWS. One root, one file per concern:
 #   site.tf        private S3 bucket with the pages (served by the api Lambda)
-#   data.tf        DynamoDB: attempts (Hack Rex) and hits (Demo 1 webhook)
+#   data.tf        DynamoDB: attempts (Hack Rex) and hits (attacker webhook)
 #   config.tf      Secrets Manager (model API keys), SSM (kill switch, admin token)
 #   guardrails.tf  Bedrock Guardrails: Rex (prompt attack, shadow) and moderation
 #   lambdas.tf     api (site + API), rex and webhook Lambdas + IAM

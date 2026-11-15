@@ -3,7 +3,7 @@
 #
 # provider: anthropic -> ANTHROPIC_API_KEY in your environment (never in this file)
 #           openai    -> OPENAI_API_KEY in your environment (never in this file)
-# Prices are USD per 1M tokens (standard API, checked 2026-11-09), used by the cost budget.
+# Prices are USD per 1M tokens (standard API prices, Nov 2026: check before relying on them), used by the cost budget.
 # `params` are passed to the provider as-is.
 
 active: haiku-4-5

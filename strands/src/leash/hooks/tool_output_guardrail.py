@@ -4,7 +4,7 @@ The Bedrock prompt-attack filter does not evaluate tool results on its own, so
 we call ApplyGuardrail ourselves on what untrusted tools bring back. Still
 shadow mode: it logs WOULD BLOCK and the injection still reaches the model.
 
-Lesson from the real test (2026-11-09): sent the raw HTML page, the filter said
+Lesson learned: sent the raw HTML page, the filter said
 NONE; sent the same page as plain text (tags and styles removed, HTML comments
 kept as text), it flagged the hidden note. Give the guardrail the words, not
 the markup.

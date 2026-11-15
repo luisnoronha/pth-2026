@@ -2,7 +2,7 @@
 
   /api/...                      the game API (leash.hackrex.api, shared with the local server)
   everything else               pages from the private S3 bucket: the attack page, scoreboard,
-                                admin, Demo 1 board and pages, poisoned pages, config.js
+                                admin, webhook board, Acme pages, player pages, config.js
 
 Fast requests only: an attack is stored and Rex is started in the background
 (the rex Lambda); the phone polls for the result.

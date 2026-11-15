@@ -2,7 +2,7 @@
 
 Evaluates every new user message with ApplyGuardrail and logs WOULD BLOCK, but
 never blocks. Verdicts are kept so you can measure false positives before you
-enforce. In Demo 1 it says "NONE": the user's prompt was innocent.
+enforce. On the Acme attack it says "NONE": the user's prompt was innocent.
 """
 
 import logging

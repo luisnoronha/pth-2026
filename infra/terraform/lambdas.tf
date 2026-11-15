@@ -1,7 +1,7 @@
 # Three Lambdas from one zip (scripts/build_lambda.py):
 #   api      fast: serves the pages; validates, stores, starts Rex, answers with an id (behind API Gateway)
 #   rex      slow: run Rex at leash level 5, judge, store the verdict        (invoked async by api)
-#   webhook  Demo 1: the attacker's endpoint + the board's feed              (Function URL)
+#   webhook  the attacker's endpoint + the board's feed                     (Function URL)
 # Each has its own role with only what it needs.
 
 resource "aws_s3_bucket" "artifacts" {
@@ -213,7 +213,7 @@ resource "aws_lambda_function_event_invoke_config" "rex" {
   maximum_event_age_in_seconds = 600
 }
 
-# --- webhook (Demo 1) --------------------------------------------------------
+# --- webhook (the attacker's endpoint) ---------------------------------------
 
 resource "aws_iam_role" "webhook" {
   name               = "${local.name}-webhook"
