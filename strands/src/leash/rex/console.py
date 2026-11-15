@@ -1,4 +1,4 @@
-"""Prints Rex's tool calls in colour, so the audience can follow the hijack.
+"""Prints Rex's tool calls in colour, so you can follow the hijack.
 
 Not a leash hook: it only watches. Lives with the CLI, not in leash.hooks.
 """

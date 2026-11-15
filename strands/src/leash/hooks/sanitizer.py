@@ -2,7 +2,7 @@
 
 Six regex families. Any line that matches is replaced by a visible marker, so
 the model knows something was removed. A speed bump, not a wall: a paraphrased
-injection walks straight past it (Demo 1, level 3b).
+injection walks straight past it (frontend/demo_pages/acme-ir-v2.html).
 """
 
 import logging

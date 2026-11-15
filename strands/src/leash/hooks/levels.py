@@ -3,7 +3,7 @@
 The CLI, the Rex Lambda and the tests all read this file. Levels are
 cumulative: level N runs every hook whose level is <= N.
 
-The list is in RUN ORDER (slide S27), not in level order:
+The list is in RUN ORDER, not in level order:
   1. state first, 2. cheap vetoes, 3. observe what actually runs,
   4. clean what came back, 5. expensive checks last.
 "Before" callbacks run top to bottom; Strands runs "After" callbacks bottom to

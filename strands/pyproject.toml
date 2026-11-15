@@ -1,8 +1,9 @@
 [project]
 name = "leash"
 version = "0.1.0"
-description = "Rex, a demo research agent, and composable Strands hooks that keep it on a leash (Porto Tech Hub 2026)."
+description = "Rex, a research agent built to be hijacked, and composable Strands hooks that keep AI agents on a leash."
 readme = "README.md"
+license = "MIT"
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "strands-agents[anthropic,openai]==1.64.0",

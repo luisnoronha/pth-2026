@@ -111,7 +111,7 @@ def guardrail_moderator() -> Callable[[str], bool]:
     """Moderation guardrail (hate, insults, sexual, violence, misconduct) if configured.
 
     Without HACKREX_MODERATION_GUARDRAIL_ID everything passes: fine, because
-    nothing is shown on screen until the speaker approves it anyway.
+    nothing is shown on screen until the host approves it anyway.
     """
     guardrail_id = os.getenv("HACKREX_MODERATION_GUARDRAIL_ID")
     if not guardrail_id:

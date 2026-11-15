@@ -1,8 +1,8 @@
 # The site's files live in one private bucket; the api Lambda serves them through
 # API Gateway, so the whole game is one https address (see backend/api/handler.py).
 #   /index.html, /scoreboard.html, /admin.html   Hack Rex (frontend/web)
-#   /board/index.html                            Demo 1 webhook board (frontend/board)
-#   /demo/acme-ir.html, /demo/acme-ir-v2.html    Demo 1 poisoned pages
+#   /board/index.html                            attacker webhook board (frontend/board)
+#   /demo/acme-ir.html, /demo/acme-ir-v2.html    Acme pages with the hidden note
 #   /demo/acme-q3.html                           clean page Rex's search results cite
 #   /p/<id>.html                                 "Poison the page" attempts (written by the api Lambda)
 #   /config.js                                   API and webhook URLs for the pages
@@ -44,7 +44,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "site" {
 }
 
 locals {
-  # The Demo 1 pages point at the local webhook; on AWS they point at the webhook Lambda.
+  # The Acme pages point at the local webhook; on AWS they point at the webhook Lambda.
   webhook_c_url = "${aws_lambda_function_url.webhook.function_url}c?d="
 
   static_files = {

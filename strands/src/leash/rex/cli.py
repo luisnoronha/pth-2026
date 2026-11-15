@@ -32,7 +32,7 @@ def main() -> None:
     parser.add_argument("--profile", help="AWS profile to use (e.g. personal)")
     parser.add_argument("--model", choices=model_names(), help="model name from rex.yaml (default: its `active`)")
     parser.add_argument("--offline", action="store_true",
-                        help="no model API: a gullible scripted brain that obeys what it reads (stage fallback)")
+                        help="no model API: a gullible scripted brain that obeys what it reads (no API key needed)")
     parser.add_argument("prompt", help='what to ask Rex, e.g. "Brief me on http://localhost:8000/acme-ir.html"')
     args = parser.parse_args()
 

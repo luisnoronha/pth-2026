@@ -1,4 +1,4 @@
-"""Demo 1 webhook board: the attacker's endpoint (a Lambda Function URL).
+"""Webhook board: the attacker's endpoint (a Lambda Function URL).
 
   GET /c?d=<anything>   records the hit; this is where a hijacked Rex sends the secret
   GET /hits             the latest hits, for the big-screen board (frontend/board)
